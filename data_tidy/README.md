@@ -10,11 +10,11 @@ In this folder you can find:
   - ***balkans\_gem\_02\_16.csv***: which includes the 21 variables only
     for the Balkans for the years 2002 to 2016. Saved as .csv to share
     it.
-  - ***balkans\_gem\_rem\_wb\_02\_16.csv***: which includes 39 variables
-    (21 from GEM + 1 from Remittances + 17 from World Bank of Balkans
+  - ***balkans\_gem\_rem\_wb\_02\_16.csv***: which includes 40 variables
+    (21 from GEM + 2 from Remittances + 17 from World Bank of Balkans
     for 2002 to 2016). Saved as .csv.
-  - ***balkans\_gem\_rem\_mig\_wb\_05\_15.csv***: which includes the 40
-    variables (21 from GEM + 1 from Remittances + 1 from Migrarion + 17
+  - ***balkans\_gem\_rem\_mig\_wb\_05\_15.csv***: which includes the 42
+    variables (21 from GEM + 2 from Remittances + 2 from Migrarion + 17
     from World Bank of Balkans for 2005, 2010 and 2015).
   - ***balkans\_codebook.csv***: includes the variable names, labels,
     descriptions, categories and other details necessary to understand
@@ -614,6 +614,19 @@ unique(balkans_gem_rem_wb_02_16$yrsurv)
 # Creating the dataset with GEM, remittances, migration and World Bank data 
 balkans_gem_rem_mig_wb_05_15 <- merge(balkans_gem_rem_mig_05_15, wb_data, 
                          by = c("yrsurv", "country"))
+```
+
+I decided to add two new variables: the remittances as a percentage of
+the GDP (`remittances_per_gdp`) and the migration as a percentage of the
+total population (`migration_per_pop`).
+
+``` r
+balkans_gem_rem_mig_wb_05_15 <- mutate(balkans_gem_rem_mig_wb_05_15,
+                                       remittances_per_gdp = remittances/gdp_ppp,
+                                       migration_per_pop = migration/population)
+
+balkans_gem_rem_wb_02_16 <- mutate(balkans_gem_rem_wb_02_16,
+                                       remittances_per_gdp = remittances/gdp_ppp)
 ```
 
 Finally, we remove the datasets without the World Bank data, since the
