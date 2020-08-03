@@ -22,12 +22,12 @@ In this folder you can find:
   - **gem\_vars\_metadata.csv**: includes all the variables used in GEM
     reports and datasets. Their names, labels, descriptions, categories
     and other details necessary to understand the entire GEM data in
-    case we could need other variable apart from the 21 used.
+    case we could need other variable apart from the 21
+used.
 
 -----
 
-You can find the codebook
-[here](https://github.com/jonaperezl/Diaspora-EE-NIS/blob/master/data_tidy/balkans_codebook.csv).
+##### You can find the codebook [here](https://github.com/jonaperezl/Diaspora-EE-NIS/blob/master/data_tidy/balkans_codebook.csv).
 
 -----
 
