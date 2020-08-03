@@ -1,6 +1,6 @@
 <<<<<<< HEAD
 =======
-.DS_Store
+*.DS_Store
 .Rproj.user/
 
 # ---- From https://github.com/github/gitignore/blob/master/R.gitignore #
@@ -41,6 +41,9 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+# R Markdown file since I will upload the .md in github style
+*.Rmd
 
 # R Environment Variables
 .Renviron
