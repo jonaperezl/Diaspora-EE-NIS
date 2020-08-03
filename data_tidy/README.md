@@ -7,27 +7,27 @@ Jonathan
 
 In this folder you can find:
 
-  - **balkans\_gem\_02\_16.csv**: which includes the 21 variables only
+  - ***balkans\_gem\_02\_16.csv***: which includes the 21 variables only
     for the Balkans for the years 2002 to 2016. Saved as .csv to share
     it.
-  - **balkans\_gem\_rem\_02\_16.csv**: which includes 22 variables (21
-    from GEM + Remittances) only for the Balkans for the years 2002 to
-    2016. Saved as .csv.
-  - **balkans\_gem\_rem\_mig\_05\_15.csv**: which includes the 23
-    variables (21 from GEM + Remittances + Migration) only for the
-    Balkans for the years 2005, 2010 and 2015. Saved as .csv.
-  - **balkans\_codebook.csv**: includes the variable names, labels,
+  - ***balkans\_gem\_rem\_wb\_02\_16.csv***: which includes 39 variables
+    (21 from GEM + 1 from Remittances + 17 from World Bank of Balkans
+    for 2002 to 2016). Saved as .csv.
+  - ***balkans\_gem\_rem\_mig\_wb\_05\_15.csv***: which includes the 40
+    variables (21 from GEM + 1 from Remittances + 1 from Migrarion + 17
+    from World Bank of Balkans for 2005, 2010 and 2015).
+  - ***balkans\_codebook.csv***: includes the variable names, labels,
     descriptions, categories and other details necessary to understand
     the data in *“balkans\_gem\_02\_16.csv”*.
-  - **gem\_vars\_metadata.csv**: includes all the variables used in GEM
-    reports and datasets. Their names, labels, descriptions, categories
-    and other details necessary to understand the entire GEM data in
-    case we could need other variable apart from the 21
+  - ***gem\_vars\_metadata.csv***: includes all the variables used in
+    GEM reports and datasets. Their names, labels, descriptions,
+    categories and other details necessary to understand the entire GEM
+    data in case we could need other variable apart from the
 used.
 
 -----
 
-##### You can find the codebook [here](https://github.com/jonaperezl/Diaspora-EE-NIS/blob/master/data_tidy/balkans_codebook.csv).
+#### You can find the codebook [here](https://github.com/jonaperezl/Diaspora-EE-NIS/blob/master/data_tidy/balkans_codebook.csv).
 
 -----
 
@@ -485,4 +485,151 @@ file.
 
 ``` r
 write_csv(balkans_gem_rem_mig_05_15, "balkans_gem_rem_mig_05_15.csv", col_names = T) 
+```
+
+-----
+
+### World Bank data
+
+In order to implement control variables, we used the World Bank API with
+the package [“WDI”](https://github.com/vincentarelbundock/WDI) to get
+the raw data from World Bank database.
+
+In the first place, we find the indicators of interest using `WDIsearch`
+and create a vector with their code. Also, we search the countries
+respective code in the World Banf Website.
+
+``` r
+library(WDI)
+
+WDIsearch("*gdp.*growth")
+
+wb_indicators <- c("NY.GDP.MKTP.PP.CD", "NY.GDP.MKTP.KD.ZG", "NY.GDP.PCAP.PP.CD", 
+                   "NY.GDP.PCAP.KD.ZG", "NE.EXP.GNFS.ZS", "SE.XPD.TOTL.GD.ZS",
+                   "BX.KLT.DINV.WD.GD.ZS", "NE.EXP.GNFS.KD.ZG", "IC.BUS.DFRN.XQ", 
+                   "IQ.CPA.TRAN.XQ", "IQ.CPA.BREG.XQ",
+                   "IC.REG.COST.PC.ZS", "IC.BUS.NDNS.ZS", "IC.BUS.NREG", 
+                   "IS.RRS.TOTL.KM", "SP.URB.TOTL.IN.ZS", "SP.POP.TOTL")
+
+wb_balkan_list <- c("ALB", "ROU", "HRV", "SVN", "BIH", "MKD", "BGR", "MNE",
+                    "SRB", "XKX")
+```
+
+After that, we run the query on the API using the function `WDI`
+indication the variables of interest, countries and years. This
+retrieves the dataframe `wb_data` and we dropped the first variable
+(country codes since we already have their names):
+
+``` r
+# Getting the data from the API
+wb_data <- WDI(indicator = wb_indicators, 
+               country = wb_balkan_list,
+               start=2002, end=2016)
+wb_data <- wb_data[,-1]
+```
+
+After that, we obtained the variable names and labels, as well as their
+units, to add them into the codebook:
+
+``` r
+# Creating a dataframe with variables codes, names and descriptions
+library(purrr)
+
+wb_ind_labels <- map_chr(3:19, function(x) attr(wb_data[[x]], "label"))
+
+wb_ind_names <- c("gdp_ppp",
+                  "gdp_growth",
+                  "gdp_percap_ppp",
+                  "gdp_percap_growth",
+                  "exports_per_gdp",
+                  "education_per_gdp",
+                  "fdi_inflows_per_gdp",
+                  "exports_growth",
+                  "ease_business_score",
+                  "transp_corrup_rating",
+                  "business_reg_rating",
+                  "cost_business_start_per_gni",
+                  "new_business_density",
+                  "new_business_registered",
+                  "rail_lines_km",
+                  "urban_population_per_total",
+                  "population")
+
+wb_ind_units <- c("(current international $)",                                                             
+                 "(annual %)",                                                          
+                 "(current international $)",                                                  
+                 "(annual %)",
+                 "(% of GDP)",                                                       
+                 "(% of GDP)",                                          
+                 "(% of GDP)",                                              
+                 "(annual % growth)",                                                
+                 "(0 = lowest performance to 100 = best performance)",                
+                 "(1=low to 6=high)",
+                 "(1=low to 6=high)",                                 
+                 "(% of GNI per capita)",                                     
+                 "(new registrations per 1,000 people ages 15-64)",                           
+                 "(number)",                                                             
+                 "(total route-km)",                                                                    
+                 "(% of total population)",                                                       
+                 "total")
+
+# Create the dataframe of info to include it into the codebook
+wb_indicators_info <- data.frame(ind_code = wb_indicators,
+                        variable = wb_ind_names,
+                        source = rep("World Bank", 17),
+                        description = wb_ind_labels,
+                        levels_units = wb_ind_units)
+
+
+# Ajusting the names of the variables in the wb_data
+names(wb_data)[2:19] <- c("yrsurv", wb_ind_names)
+wb_data$country <- as.factor(wb_data$country)
+
+# Recode to match for Macedonia 
+wb_data$country <- recode_factor(wb_data$country,
+  "North Macedonia" = "Macedonia",
+)
+```
+
+Next, we merge the dataframe of World Bank variables `wb_bank` with the
+existing datasets of ***balkans\_gem\_rem\_02\_16.csv*** (GEM +
+Remittances for 2002 to 2016) and
+***balkans\_gem\_rem\_mig\_05\_15.csv*** (GEM + Remittances + Migrarion
+for 2005, 2010 and 2015).
+
+``` r
+# Recode to match for Macedonia 
+wb_data$country <- recode_factor(wb_data$country,
+  "North Macedonia" = "Macedonia",
+)
+
+
+# Creating the dataset with GEM, remittances and World Bank data 
+balkans_gem_rem_wb_02_16 <- merge(balkans_gem_rem_02_16, wb_data, 
+                         by = c("yrsurv", "country"))
+
+unique(balkans_gem_rem_wb_02_16$yrsurv)
+
+
+# Creating the dataset with GEM, remittances, migration and World Bank data 
+balkans_gem_rem_mig_wb_05_15 <- merge(balkans_gem_rem_mig_05_15, wb_data, 
+                         by = c("yrsurv", "country"))
+```
+
+Finally, we remove the datasets without the World Bank data, since the
+new ones have better information, also, we export the new ones. This is,
+we now have the two datasets: ***balkans\_gem\_rem\_wb\_02\_16*** (GEM +
+Remittances + World Bank for 2002 to 2016) and
+***balkans\_gem\_rem\_mig\_wb\_05\_15*** (GEM + Remittances + Migrarion
++ World Bank for 2005, 2010 and 2015).
+
+``` r
+rm(balkans_gem_rem_02_16)
+rm(balkans_gem_rem_mig_05_15)
+
+# Export balkans_gem_rem_wb_02_16 (GEM + Remittances + World Bank for 2002 to 2016)
+write_csv(balkans_gem_rem_wb_02_16, "balkans_gem_rem_wb_02_16.csv", col_names = T) 
+
+# Export balkans_gem_rem_mig_wb_05_15 (GEM + Remittances + Migrarion + World Bank for 2005, 2010 and 2015)
+write_csv(balkans_gem_rem_mig_wb_05_15, "balkans_gem_rem_mig_wb_05_15.csv", col_names = T) 
 ```
