@@ -22,3 +22,20 @@ teayyopp,GEM,Involved in Opportunity early-stage Entrepreneurial Activity,"[0] N
 teayynec,GEM,Involved in Necessity early-stage Entrepreneurial Activity,"[0] NO; [1] YES; [9] DONT KNOW, OTHER"
 remittances,World Bank,Migrant remittance inflows,US$ million
 migration,United Nations,Total migrant stock at mid-year by origin,Number of emigrants
+gdp_ppp,World Bank,"GDP, PPP (current international $)",(current international $)
+gdp_growth,World Bank,GDP growth (annual %),(annual %)
+gdp_percap_ppp,World Bank,"GDP per capita, PPP (current international $)",(current international $)
+gdp_percap_growth,World Bank,GDP per capita growth (annual %),(annual %)
+exports_per_gdp,World Bank,Exports of goods and services (% of GDP),(% of GDP)
+education_per_gdp,World Bank,"Government expenditure on education, total (% of GDP)",(% of GDP)
+fdi_inflows_per_gdp,World Bank,"Foreign direct investment, net inflows (% of GDP)",(% of GDP)
+exports_growth,World Bank,Exports of goods and services (annual % growth),(annual % growth)
+ease_business_score,World Bank,Ease of doing business score (0 = lowest performance to 100 = best performance),(0 = lowest performance to 100 = best performance)
+transp_corrup_rating,World Bank,"CPIA transparency, accountability, and corruption in the public sector rating (1=low to 6=high)",(1=low to 6=high)
+business_reg_rating,World Bank,CPIA business regulatory environment rating (1=low to 6=high),(1=low to 6=high)
+cost_business_start_per_gni,World Bank,Cost of business start-up procedures (% of GNI per capita),(% of GNI per capita)
+new_business_density,World Bank,"New business density (new registrations per 1,000 people ages 15-64)","(new registrations per 1,000 people ages 15-64)"
+new_business_registered,World Bank,New businesses registered (number),(number)
+rail_lines_km,World Bank,Rail lines (total route-km),(total route-km)
+urban_population_per_total,World Bank,Urban population (% of total population),(% of total population)
+population,World Bank,"Population, total",total
