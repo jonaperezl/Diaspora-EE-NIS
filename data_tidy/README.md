@@ -3,7 +3,7 @@ Data transformation process from raw to tidy
 Jonathan
 8/1/2020
 
-## Data processing log
+# Data processing log of **GEM data** from raw to tidy
 
 ### Tidy datasets created as output of this process and stored in `data_tidy` folder:
 
@@ -28,12 +28,13 @@ The GEM APS Individual Level datasets from each year were downloaded
 from the [GEM Consortium
 website](https://www.gemconsortium.org/data/sets?id=aps).
 
-**Warning:** The GEM dataset of 2013 (.zip) had problems to import with
-the function `read_sav` (using macOS Mojave 10.14.6, R version 3.6.2),
-so it was not readable. To solve this problem, it was necesssary to
-decompress the dataset and read the .sav file directly in R with
-`read_sav` function, then save a new .sav version of the dataset from R
-using `write_sav`. Finally, this new file was compressed in .zip.
+> **Warning:** The GEM dataset of 2013 (.zip) had problems to import
+> with the function `read_sav` (using macOS Mojave 10.14.6, R version
+> 3.6.2), so it was not readable. To solve this problem, it was
+> necesssary to decompress the dataset and read the .sav file directly
+> in R with `read_sav` function, then save a new .sav version of the
+> dataset from R using `write_sav`. Finally, this new file was
+> compressed in .zip.
 
 Then, the data was imported as a list of lists (ie. each GEM dataset is
 a list and all the datasets are contained in one list) using `read_sav`:
@@ -248,3 +249,26 @@ lapply(vars_metadata, function(x) {
   )
 })
 ```
+
+-----
+
+# Data processing log of **remittances** and **migration** from raw to tidy
+
+### Tidy datasets created as output of this process and stored in `data_tidy` folder:
+
+  - **gem\_balkans\_01\_16.csv**: which includes the 21 variables only
+    for the Balkans for the years 2001 to 2016. Saved as .csv to share
+    it.
+  - **gem\_balkans\_codebook.csv**: includes the variable names, labels,
+    descriptions, categories and other details necessary to understand
+    the data in *“gem\_balkans\_01\_16.csv”*.
+
+### Raw Remittances datasets
+
+The Remittances dataset was obtained from most recent World Bank dataset
+[“Annual Remittances Data (updated as of
+Apr. 2020)”](https://www.worldbank.org/en/topic/migrationremittancesdiasporaissues/brief/migration-remittances-data).
+I used the ***inflows*** dataset since we are trying to proxy the
+connections from the diaspora to the country of origin.
+
+> This raw dataset is stored in `"data_raw/remit_migr"` folder.
