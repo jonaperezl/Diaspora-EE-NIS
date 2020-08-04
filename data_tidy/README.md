@@ -608,12 +608,34 @@ wb_data$country <- recode_factor(wb_data$country,
 balkans_gem_rem_wb_02_16 <- merge(balkans_gem_rem_02_16, wb_data, 
                          by = c("yrsurv", "country"))
 
-unique(balkans_gem_rem_wb_02_16$yrsurv)
-
 
 # Creating the dataset with GEM, remittances, migration and World Bank data 
 balkans_gem_rem_mig_wb_05_15 <- merge(balkans_gem_rem_mig_05_15, wb_data, 
                          by = c("yrsurv", "country"))
+
+
+# Adjusting the variables with percentages as decimal format 
+blk <- balkans_gem_rem_wb_02_16
+
+balkans_gem_rem_wb_02_16 <- as.data.frame(select(balkans_gem_rem_wb_02_16, 
+                                                 !contains("_per_") & !contains("growth")))
+
+balkans_gem_rem_wb_02_16 <- cbind(balkans_gem_rem_wb_02_16, 
+                                  select(blk, contains("_per_") | contains("growth")) %>%
+                                    lapply(function(x) {x/100}))
+
+
+
+blk <- balkans_gem_rem_mig_wb_05_15
+
+balkans_gem_rem_mig_wb_05_15 <- as.data.frame(select(balkans_gem_rem_mig_wb_05_15, 
+                                                     !contains("_per_") & !contains("growth")))
+
+balkans_gem_rem_mig_wb_05_15 <- cbind(balkans_gem_rem_mig_wb_05_15,
+                                      select(blk, contains("_per_") | contains("growth")) %>%
+                                        lapply(function(x) {x/100}))
+
+rm(blk)
 ```
 
 I decided to add two new variables: the remittances as a percentage of
@@ -622,11 +644,13 @@ total population (`migration_per_pop`).
 
 ``` r
 balkans_gem_rem_mig_wb_05_15 <- mutate(balkans_gem_rem_mig_wb_05_15,
-                                       remittances_per_gdp = remittances/gdp_ppp,
+                                       remittances_per_gdp = remittances*1e6/gdp_ppp,
                                        migration_per_pop = migration/population)
 
 balkans_gem_rem_wb_02_16 <- mutate(balkans_gem_rem_wb_02_16,
-                                       remittances_per_gdp = remittances/gdp_ppp)
+                                       remittances_per_gdp = remittances*1e6/gdp_ppp)
+
+summary(balkans_gem_rem_wb_02_16)
 ```
 
 Finally, we remove the datasets without the World Bank data, since the
@@ -646,3 +670,37 @@ write_csv(balkans_gem_rem_wb_02_16, "balkans_gem_rem_wb_02_16.csv", col_names = 
 # Export balkans_gem_rem_mig_wb_05_15 (GEM + Remittances + Migrarion + World Bank for 2005, 2010 and 2015)
 write_csv(balkans_gem_rem_mig_wb_05_15, "balkans_gem_rem_mig_wb_05_15.csv", col_names = T) 
 ```
+
+## This is a graph of the availability of information:
+
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+|                        | 2002 | 2003 | 2004 | 2005 | 2006 | 2007 | 2008 | 2009 | 2010 | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 |
+| :--------------------- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Croatia                | 2001 | 2000 | 2016 | 2000 | 2000 | 2000 | 1996 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 |
+| Slovenia               | 2030 | 2012 | 2003 | 3016 | 3008 | 3020 | 3019 | 3030 | 3012 | 2009 | 2010 | 2002 | 2004 | 2009 | 2001 |
+| Romania                |    0 |    0 |    0 |    0 |    0 | 2046 | 2206 | 2093 | 2235 | 2028 | 2004 | 2021 | 2001 | 2002 |    0 |
+| Serbia                 |    0 |    0 |    0 |    0 |    0 | 2200 | 2297 | 2300 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
+| Bosnia and Herzegovina |    0 |    0 |    0 |    0 |    0 |    0 | 2028 | 2000 | 2000 | 2277 | 2001 | 2004 | 2015 |    0 |    0 |
+| Macedonia              |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 | 2002 |    0 | 2003 | 2000 |    0 | 2001 | 2000 |
+| Montenegro             |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |    0 |    0 |    0 |    0 |
+| Kosovo                 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |
+| Bulgaria               |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2002 | 2000 |
+
+Number of observations per country for each year
+
+-----
+
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+|                        | 2005 | 2010 | 2015 |
+| :--------------------- | ---: | ---: | ---: |
+| Croatia                | 2000 | 2000 | 2000 |
+| Slovenia               | 3016 | 3012 | 2009 |
+| Bosnia and Herzegovina |    0 | 2000 |    0 |
+| Macedonia              |    0 | 2002 | 2001 |
+| Montenegro             |    0 | 2000 |    0 |
+| Romania                |    0 | 2235 | 2002 |
+| Bulgaria               |    0 |    0 | 2002 |
+
+Number of observations per country for each year
