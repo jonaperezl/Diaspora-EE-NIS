@@ -31,6 +31,31 @@ used.
 
 -----
 
+## This is a graph of the availability of information:
+
+![](README_files/figure-gfm/Graph%20data%20remittances-1.png)<!-- -->
+
+|                        | 2002 | 2003 | 2004 | 2005 | 2006 | 2007 | 2008 | 2009 | 2010 | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 |
+| :--------------------- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Croatia                | 2001 | 2000 | 2016 | 2000 | 2000 | 2000 | 1996 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 |
+| Slovenia               | 2030 | 2012 | 2003 | 3016 | 3008 | 3020 | 3019 | 3030 | 3012 | 2009 | 2010 | 2002 | 2004 | 2009 | 2001 |
+| Romania                |    0 |    0 |    0 |    0 |    0 | 2046 | 2206 | 2093 | 2235 | 2028 | 2004 | 2021 | 2001 | 2002 |    0 |
+| Serbia                 |    0 |    0 |    0 |    0 |    0 | 2200 | 2297 | 2300 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
+| Bosnia and Herzegovina |    0 |    0 |    0 |    0 |    0 |    0 | 2028 | 2000 | 2000 | 2277 | 2001 | 2004 | 2015 |    0 |    0 |
+| Macedonia              |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 | 2002 |    0 | 2003 | 2000 |    0 | 2001 | 2000 |
+| Montenegro             |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |    0 |    0 |    0 |    0 |
+| Kosovo                 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |
+| Bulgaria               |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2002 | 2000 |
+
+Number of observations per country for each
+year
+
+|                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![](README_files/figure-gfm/Graph%20data%20migration-1.png)<!-- -->                                                                                                                                                                                                                                  |
+| Table: Number of observations per country for each year                                                                                                                                                                                                                                              |
+| | | 2005| 2010| 2013| 2015| |:———————-|—-:|—-:|—-:|—-:| |Croatia | 2000| 2000| 2000| 2000| |Slovenia | 3016| 3012| 2002| 2009| |Bosnia and Herzegovina | 0| 2000| 2004| 0| |Macedonia | 0| 2002| 2000| 2001| |Montenegro | 0| 2000| 0| 0| |Romania | 0| 2235| 2021| 2002| |Bulgaria | 0| 0| 0| 2002| |
+
 # Description of the data transformation process
 
 ## Data processing log of **GEM data** from raw to tidy
@@ -120,14 +145,6 @@ potential interest that are present in the 16 datasets.
     
     # creating the vector with the GEM variables needed for the analysis
     gem_vars <- vars_common[!vars_common %in% remove_vars]
-    
-
-
-# Codebook 
-    
-    # creating the codebook for the GEM variables
-    gem_codebook <- vars_metadata[[1]][vars_metadata[[1]]$variable %in% 
-                                         gem_vars,]
 ```
 
 After that, I filtered the data leaving only the variables of interest
@@ -403,6 +420,10 @@ migration_balkans <- read_excel(here("data_raw", "remit_migr",
                                "un_migrant_stock_2019.xlsx"), 
                                sheet = "Table 1", skip = 15)
 
+migration_balkans_13 <- read_excel(here("data_raw", "remit_migr", 
+                               "un_migrant_stock_2013.xls"), 
+                               sheet = "Table 10", skip = 15)
+
 # Import GEM dataset to merge with 
 df_gem_balkans <- read_csv("balkans_gem_02_16.csv", 
                            col_types = "ddffdffffffffffffffff")
@@ -423,21 +444,34 @@ library(reshape2)
 names(migration_balkans)[1] <- "yrsurv"
 names(migration_balkans)[3] <- "destination"
 
+migration_balkans_13$yrsurv <- 2013
+names(migration_balkans_13)[2] <- "destination"
+
 head(migration_balkans)
+head(migration_balkans_13)
+
+names(migration_balkans)
+names(migration_balkans_13)
+
 
 # Filter by destination selecting only the WORLD
 migration_balkans <- filter(migration_balkans, destination == "WORLD")
-
+migration_balkans_13 <- filter(migration_balkans_13, destination == "WORLD")
 
 # Reshaping the dataset 
 migration_balkans <- melt(migration_balkans, id.vars = "yrsurv" , value.name = "migration")
 migration_balkans$migration <- as.numeric(as.character(migration_balkans$migration))
 
+migration_balkans_13 <- melt(migration_balkans_13, id.vars = "yrsurv" , value.name = "migration")
+migration_balkans_13$migration <- as.numeric(as.character(migration_balkans_13$migration))
+
 # Changing the names of the variables year 
 names(migration_balkans)[2] <- "country"
+names(migration_balkans_13)[2] <- "country"
 
 # Filter by the years of interest 
 migration_balkans <- filter(migration_balkans, yrsurv %in% unique(df_gem_balkans$yrsurv))
+migration_balkans_13 <- filter(migration_balkans_13, yrsurv %in% unique(df_gem_balkans$yrsurv))
 ```
 
 Then filter by the Balkans of interest (same used in GEM datasets).
@@ -453,10 +487,14 @@ balkans_list <- c(
   "Montenegro", "Serbia", "Kosovo"
 )
 
+levels(migration_balkans_13$country)
 
 # Recode country names to match and filter 
 migration_balkans$country <- recode_factor(migration_balkans$country,
   "North Macedonia" = "Macedonia",
+)
+migration_balkans_13$country <- recode_factor(migration_balkans_13$country,
+  "The former Yugoslav Republic of Macedonia" = "Macedonia",
 )
 
 
@@ -464,7 +502,14 @@ migration_balkans$country <- recode_factor(migration_balkans$country,
 migration_balkans <- filter(migration_balkans, country %in% balkans_list)
 migration_balkans$country <- droplevels(migration_balkans$country)
 
-levels(migration_balkans$country)
+migration_balkans_13 <- filter(migration_balkans_13, country %in% balkans_list)
+migration_balkans_13$country <- droplevels(migration_balkans_13$country)
+
+levels(migration_balkans_13$country)
+
+migration_balkans <- rbind(migration_balkans, migration_balkans_13)
+
+levels(migration_balkans_2$country)
 ```
 
 Then, I merged the migration and the final dataset
@@ -478,6 +523,8 @@ analysis:
 ``` r
 balkans_gem_rem_mig_05_15 <- merge(balkans_gem_rem_02_16, migration_balkans, 
                          by = c("yrsurv", "country"))
+
+unique(blk_gem_rem_wb_02_16$yrsurv)
 ```
 
 Now, we export the final dataset `balkans_gem_rem_mig_05_15` to a .csv
@@ -648,7 +695,7 @@ balkans_gem_rem_mig_wb_05_15 <- mutate(balkans_gem_rem_mig_wb_05_15,
                                        migration_per_pop = migration/population)
 
 balkans_gem_rem_wb_02_16 <- mutate(balkans_gem_rem_wb_02_16,
-                                       remittances_per_gdp = remittances*1e6/gdp_ppp)
+                                   remittances_per_gdp = remittances*1e6/gdp_ppp)
 
 summary(balkans_gem_rem_wb_02_16)
 ```
@@ -670,37 +717,3 @@ write_csv(balkans_gem_rem_wb_02_16, "balkans_gem_rem_wb_02_16.csv", col_names = 
 # Export balkans_gem_rem_mig_wb_05_15 (GEM + Remittances + Migrarion + World Bank for 2005, 2010 and 2015)
 write_csv(balkans_gem_rem_mig_wb_05_15, "balkans_gem_rem_mig_wb_05_15.csv", col_names = T) 
 ```
-
-## This is a graph of the availability of information:
-
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
-
-|                        | 2002 | 2003 | 2004 | 2005 | 2006 | 2007 | 2008 | 2009 | 2010 | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 |
-| :--------------------- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Croatia                | 2001 | 2000 | 2016 | 2000 | 2000 | 2000 | 1996 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 | 2000 |
-| Slovenia               | 2030 | 2012 | 2003 | 3016 | 3008 | 3020 | 3019 | 3030 | 3012 | 2009 | 2010 | 2002 | 2004 | 2009 | 2001 |
-| Romania                |    0 |    0 |    0 |    0 |    0 | 2046 | 2206 | 2093 | 2235 | 2028 | 2004 | 2021 | 2001 | 2002 |    0 |
-| Serbia                 |    0 |    0 |    0 |    0 |    0 | 2200 | 2297 | 2300 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| Bosnia and Herzegovina |    0 |    0 |    0 |    0 |    0 |    0 | 2028 | 2000 | 2000 | 2277 | 2001 | 2004 | 2015 |    0 |    0 |
-| Macedonia              |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 | 2002 |    0 | 2003 | 2000 |    0 | 2001 | 2000 |
-| Montenegro             |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |    0 |    0 |    0 |    0 |
-| Kosovo                 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2000 |    0 |    0 |
-| Bulgaria               |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 | 2002 | 2000 |
-
-Number of observations per country for each year
-
------
-
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
-
-|                        | 2005 | 2010 | 2015 |
-| :--------------------- | ---: | ---: | ---: |
-| Croatia                | 2000 | 2000 | 2000 |
-| Slovenia               | 3016 | 3012 | 2009 |
-| Bosnia and Herzegovina |    0 | 2000 |    0 |
-| Macedonia              |    0 | 2002 | 2001 |
-| Montenegro             |    0 | 2000 |    0 |
-| Romania                |    0 | 2235 | 2002 |
-| Bulgaria               |    0 |    0 | 2002 |
-
-Number of observations per country for each year
